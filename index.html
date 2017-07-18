@@ -9,11 +9,17 @@
       margin: 0;
       padding: 0;
     }
+
+    canvas{
+      display:block;
+      margin:50px auto;
+      box-shadow:-2px -2px 2px #EFEFEF,5px 5px 5px #B9B9B9;
+    }
   </style>
 </head>
 <body>
-  <canvas id="checkerboard" width="1024" height="768" onmousedown="play(event)"></canvas>
+  <canvas id="checkerboard" width="450" height="450"></canvas>
 
-  <script type="text/javascript" src="./index-canvas.js"></script>
+  <script type="text/javascript" src="./index.js"></script>
 </body>
 </html>
