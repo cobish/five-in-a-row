@@ -258,24 +258,27 @@ var canvasObj = {
 
   // 悔棋 与 取消悔棋
   revert() {
-    console.log(dataObj.recordIndex);
     this.context.putImageData(this.lastImg[dataObj.recordIndex], 0, 0);
     dataObj.isWhite = !dataObj.isWhite;
   },
 
   // 初始化数据
   _initData: function() {
-    for (var i = 0; i < this.records; i++) {
-      var x = this.records[i].x;
-      var y = this.records[i].y;
+    for (var i = 0; i < dataObj.recordIndex; i++) {
+      var x = dataObj.records[i].x;
+      var y = dataObj.records[i].y;
 
       var data = dataObj.chessData[x][y];
       if (data === 1) {
         dataObj.isWhite = true;
-        this._downCheck(x, y);
+        dataObj.chessData[x][y] = 1;
+        this._drawCheck(x, y);
+        dataObj.isWhite = !dataObj.isWhite;
       } else if (data === 2) {
         dataObj.isWhite = false;
-        this._downCheck(x, y);
+        dataObj.chessData[x][y] = 2;
+        this._drawCheck(x, y);
+        dataObj.isWhite = !dataObj.isWhite;
       }
     }
   },
@@ -379,6 +382,7 @@ var canvasObj = {
     }
 
     // 记录每一步棋
+    dataObj.records.length = dataObj.recordIndex;
     dataObj.recordIndex += 1;
     dataObj.records.push({
       x: x,
@@ -431,17 +435,21 @@ var domObj = {
 
    // 初始化数据
   _initData: function() {
-    for (var i = 0; i < this.records; i++) {
-      var x = this.records[i].x;
-      var y = this.records[i].y;
+    for (var i = 0; i < dataObj.recordIndex; i++) {
+      var x = dataObj.records[i].x;
+      var y = dataObj.records[i].y;
 
       var data = dataObj.chessData[x][y];
       if (data === 1) {
         dataObj.isWhite = true;
-        this._downCheck(y, x);
+        dataObj.chessData[x][y] = 1;
+        this._drawCheck(y, x);
+        dataObj.isWhite = !dataObj.isWhite;
       } else if (data === 2) {
         dataObj.isWhite = false;
-        this._downCheck(y, x);
+        dataObj.chessData[x][y] = 2;
+        this._drawCheck(y, x);
+        dataObj.isWhite = !dataObj.isWhite;
       }
     }
   },
@@ -575,6 +583,7 @@ var domObj = {
     }
 
     // 记录每一步棋
+    dataObj.records.length = dataObj.recordIndex;
     dataObj.recordIndex += 1;
     dataObj.records.push({
       x: y,
@@ -604,6 +613,11 @@ document.getElementById('switch').addEventListener('change', function() {
   }
 });
 
+// 重新游戏
+document.getElementById('restart').addEventListener('click', function() {
+  window.location.reload();
+});
+
 // 悔棋
 document.getElementById('revert').addEventListener('click', function() {
   if (dataObj.winner || dataObj.recordIndex < 1){
@@ -618,6 +632,8 @@ document.getElementById('revert').addEventListener('click', function() {
   } else {
     domObj.revert(data.x, data.y);
   }
+
+  dataObj.chessData[data.x][data.y] = 0;
 });
 
 // 撤销悔棋
@@ -627,13 +643,17 @@ document.getElementById('removeRevert').addEventListener('click', function() {
   }
 
   var data = dataObj.records[dataObj.recordIndex];
-  dataObj.recordIndex += 1;
+  if (dataObj.isWhite) {
+    dataObj.chessData[data.x][data.y] = 1;
+  } else {
+    dataObj.chessData[data.x][data.y] = 2;
+  }
 
+  dataObj.recordIndex += 1;
   if (dataObj.type === 0) {
     canvasObj.revert();
+
   } else {
     domObj.removeRevert(data.x, data.y);
   }
 });
-
-
