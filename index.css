@@ -29,3 +29,7 @@ canvas {
   margin-bottom: 50px;
   text-align: center;
 }
+
+button {
+  margin-left: 20px;
+}
