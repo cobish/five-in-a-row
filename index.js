@@ -204,6 +204,8 @@ var dataObj = {
     if (typeof cb === 'function') {
       cb(line);
     }
+
+    document.getElementById('switch').disabled = true;
   }
 };
 
@@ -230,12 +232,34 @@ var canvasObj = {
   init: function() {
     this.context = this.el.getContext('2d');
     this._drawBoard();
-    this.el.addEventListener('click', this._handleClick.bind(this));
+    this._initData();
+    this.el.onclick = this._handleClick.bind(this);
+    this.el.style.display = 'block';
   },
 
   // 销毁
   destory: function() {
-    this.el.removeEventListener('click', this._handleClick.bind(this));
+    this.context.clearRect(0, 0, this.width, this.width);
+    this.context = null;
+    this.el.onclick = null;
+    this.el.style.display = 'none';
+  },
+
+  // 初始化数据
+  _initData: function() {
+   for (var i = 0; i < this.rectSize; i++) {
+      for (var j = 0; j < this.rectSize; j++) {
+        var data = dataObj.chessData[i][j];
+
+        if (data === 1) {
+          dataObj.isWhite = true;
+          this._downCheck(i, j);
+        } else if (data === 2) {
+          dataObj.isWhite = false;
+          this._downCheck(i, j);
+        }
+      }
+    }
   },
 
   // 绑定点击事件
@@ -334,5 +358,197 @@ var canvasObj = {
   }
 };
 
+// dom 版本对象
+var domObj = {
+  el: document.getElementById('domBoard'),
+
+  // 棋盘大小
+  width: 450,
+
+  // 棋盘间距
+  padding: 15,
+
+  // 格子大小
+  rectWidth: 30,
+
+  // 格子个数
+  rectSize: dataObj.size,
+
+  // 初始化
+  init: function() {
+    this._drawBoard();
+    this._drawGhostCheck();
+    this._initData();
+    this.el.style.display = 'block';
+  },
+
+  // 销毁
+  destory: function() {
+    this.el.innerHTML = '';
+    this.el.style.display = 'none';
+  },
+
+   // 初始化数据
+  _initData: function() {
+   for (var i = 0; i < this.rectSize; i++) {
+      for (var j = 0; j < this.rectSize; j++) {
+        var data = dataObj.chessData[i][j];
+
+        if (data === 1) {
+          dataObj.isWhite = true;
+          this._downCheck(j, i);
+        } else if (data === 2) {
+          dataObj.isWhite = false;
+          this._downCheck(j, i);
+        }
+      }
+    }
+  },
+
+  // 画棋盘
+  _drawBoard: function() {
+    var table = document.createElement('table');
+    table.style.marginTop = this.padding + 'px';
+    table.style.marginLeft = this.padding + 'px';
+
+    for (var i = 0; i < this.rectSize - 1; i++) {
+      var tr = document.createElement('tr');
+
+      for (var j = 0; j < this.rectSize - 1; j++) {
+        var td = document.createElement('td');
+        td.width = this.rectWidth;
+        td.height = this.rectWidth;
+        td.style.border = '2px solid #bfbfbf';
+        td.style.boxSizing = 'border-box';
+        tr.appendChild(td);
+      }
+
+      table.appendChild(tr);
+    }
+
+    this.el.appendChild(table);
+  },
+
+  // 画出隐形的棋子
+  _drawGhostCheck: function() {
+    var self = this;
+    var table = document.createElement('table');
+    table.style.position = 'absolute';
+    table.style.top = 0;
+    table.style.left = 0;
+
+    for (var i = 0; i < this.rectSize; i++) {
+      var tr = document.createElement('tr');
+
+      for (var j = 0; j < this.rectSize; j++) {
+        var td = document.createElement('td');
+        td.style.position = 'relative';
+        td.width = this.rectWidth;
+        td.height = this.rectWidth;
+        td.style.boxSizing = 'border-box';
+
+        var div = document.createElement('div');
+        div.id = j + '-' + i;
+        div.style.position = 'absolute';
+        div.style.margin = 'auto';
+        div.style.top = 0;
+        div.style.left = 0;
+        div.style.bottom = 0;
+        div.style.right = 0;
+        div.style.width = '24px';
+        div.style.height= '24px';
+        div.style,
+        div.style.borderRadius = '50%';
+
+        td.appendChild(div);
+        tr.appendChild(td);
+
+        // 绑定点击事件
+        (function(i, j) {
+          td.addEventListener('click', function() {
+            self._handleClick(i, j);
+          });
+        })(i, j);
+      }
+
+      table.appendChild(tr);
+    }
+
+    this.el.appendChild(table);
+  },
+
+  // 画棋子
+  _drawCheck: function(x, y) {
+    var color = '#0a0a0a';
+
+    if (dataObj.isWhite) {
+      color = '#d1d1d1';
+    }
+
+    var id = y + '-' + x;
+    document.getElementById(id).style.background = color;
+  },
+
+  // 画赢的线
+  _drawSuccessLine: function(line) {
+    var x1 = line[0];
+    var y1 = line[1];
+    var x2 = line[2];
+    var y2 = line[3];
+
+    var color = 'red';
+    document.getElementById(x1 + '-' + y1).style.background = color;
+    document.getElementById(x2 + '-' + y2).style.background = color;
+  },
+
+  // 绑定点击事件
+  _handleClick(x, y) {
+    if (dataObj.chessData[y][x] !== 0) {
+      return;
+    }
+
+    this._downCheck(x, y);
+  },
+
+  // 下棋
+  _downCheck: function(x, y) {
+    if (dataObj.winner) {
+      alert(dataObj.winner);
+      return;
+    }
+
+    if (dataObj.isWhite) {
+      dataObj.chessData[y][x] = 1;
+    } else {
+      dataObj.chessData[y][x] = 2;
+    }
+
+    this._drawCheck(x, y);
+    dataObj.checkWinner(y, x, this._drawSuccessLine.bind(this));
+
+    dataObj.isWhite = !dataObj.isWhite;
+    dataObj.step -= 1;
+    if (dataObj.step === 0) {
+      dataObj.winner = '和局';
+      alert(dataObj.winner);
+    }
+  }
+};
+
 dataObj.init();
 canvasObj.init();
+
+document.getElementById('switch').addEventListener('change', function() {
+  var index = this.selectedIndex;
+  var value = parseInt(this.options[index].value);
+
+  if (value === 1) {
+    // canvas
+    domObj.destory();
+    canvasObj.init();
+  } else {
+    // dom
+    canvasObj.destory();
+    domObj.init();
+  }
+});

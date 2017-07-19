@@ -1,0 +1,31 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+canvas {
+  display: block;
+  margin: 50px auto;
+  box-shadow: -2px -2px 2px #EFEFEF,5px 5px 5px #B9B9B9;
+}
+
+.chessboard {
+  display: none;
+  position: relative;
+  width: 450px;
+  height: 450px;
+  margin: 50px auto;
+  overflow: hidden;
+  box-shadow: -2px -2px 2px #EFEFEF,5px 5px 5px #B9B9B9;
+}
+
+.chessboard table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.container {
+  margin-bottom: 50px;
+  text-align: center;
+}
