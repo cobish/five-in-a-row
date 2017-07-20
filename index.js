@@ -82,13 +82,14 @@ var dataObj = {
     }
 
     if (count - 1 === 5) {
-      this._success(line, temp, cb);
+      this._success(line, temp, cb, 0);
       return true;
     } else {
       return false;
     }
   },
 
+  // 上下计算
   _tbCount: function(x, y, temp, cb) {
     var count = 0;
     var chessData = this.chessData;
@@ -117,7 +118,7 @@ var dataObj = {
     }
 
     if (count - 1 === 5) {
-      this._success(line, temp, cb);
+      this._success(line, temp, cb, 1);
       return true;
     } else {
       return false;
@@ -130,7 +131,7 @@ var dataObj = {
     var chessData = this.chessData;
     var line = new Array(4);
 
-    for (var i = x, j = y; i < 15 && j >= 0;) {
+    for (var i = x, j = y; i >= 0 && j < 15;) {
       if (chessData[i][j] !== temp) {
         break;
       }
@@ -138,11 +139,11 @@ var dataObj = {
       count += 1;
       line[0] = i;
       line[1] = j;
-      i += 1;
-      j -= 1;
+      i -= 1;
+      j += 1;
     }
 
-    for (var i = x, j = y; i >= 0 && j < 15;) {
+    for (var i = x, j = y; i < 15 && j >= 0;) {
       if (chessData[i][j] !== temp) {
         break;
       }
@@ -150,12 +151,12 @@ var dataObj = {
       count += 1;
       line[2] = i;
       line[3] = j;
-      i -= 1;
-      j += 1;
+      i += 1;
+      j -= 1;
     }
 
     if (count - 1 === 5) {
-      this._success(line, temp, cb);
+      this._success(line, temp, cb, 2);
       return true;
     } else {
       return false;
@@ -168,7 +169,7 @@ var dataObj = {
     var chessData = this.chessData;
     var line = new Array(4);
 
-    for (var i = x, j = y; i < 15 && j < 15;) {
+    for (var i = x, j = y; i >= 0 && j >= 0;) {
       if (chessData[i][j] !== temp) {
         break;
       }
@@ -176,11 +177,11 @@ var dataObj = {
       count += 1;
       line[0] = i;
       line[1] = j;
-      i += 1;
-      j += 1;
+      i -= 1;
+      j -= 1;
     }
 
-    for (var i = x, j = y; i >= 0 && j >= 0;) {
+    for (var i = x, j = y; i < 15 && j < 15;) {
       if (chessData[i][j] !== temp) {
         break;
       }
@@ -188,12 +189,12 @@ var dataObj = {
       count += 1;
       line[2] = i;
       line[3] = j;
-      i -= 1;
-      j -= 1;
+      i += 1;
+      j += 1;
     }
 
     if (count - 1 === 5) {
-      this._success(line, temp, cb);
+      this._success(line, temp, cb, 3);
       return true;
     } else {
       return false;
@@ -201,7 +202,7 @@ var dataObj = {
   },
 
   // 有一方胜利
-  _success: function(line, temp, cb) {
+  _success: function(line, temp, cb, winType) {
     var winner = '黑棋胜利';
 
     if (temp === 1) {
@@ -211,7 +212,7 @@ var dataObj = {
     alert(winner);
     this.winner = winner;
     if (typeof cb === 'function') {
-      cb(line);
+      cb(line, winType);
     }
 
     document.getElementById('switch').disabled = true;
@@ -328,6 +329,8 @@ var canvasObj = {
   // 画棋子
   _drawCheck: function(x, y) {
     var context = this.context;
+    var rectWidth = this.rectWidth;
+    var padding = this.padding;
     var color = '#0a0a0a';
 
     if (dataObj.isWhite) {
@@ -336,7 +339,7 @@ var canvasObj = {
 
     context.fillStyle = color;
     context.beginPath();
-    context.arc(x * 30 + 15, y * 30 + 15, 12, 0, Math.PI * 2, true);
+    context.arc(x * rectWidth + padding, y * rectWidth + padding, padding - 3, 0, Math.PI * 2, true);
     context.closePath();
     context.fill();
 
@@ -457,8 +460,8 @@ var domObj = {
   // 画棋盘
   _drawBoard: function() {
     var table = document.createElement('table');
-    table.style.marginTop = this.padding + 'px';
-    table.style.marginLeft = this.padding + 'px';
+    table.style.marginTop = this.padding - 1 + 'px';
+    table.style.marginLeft = this.padding - 1 + 'px';
 
     for (var i = 0; i < this.rectSize - 1; i++) {
       var tr = document.createElement('tr');
@@ -539,15 +542,43 @@ var domObj = {
   },
 
   // 画赢的线
-  _drawSuccessLine: function(line) {
-    var x1 = line[0];
-    var y1 = line[1];
-    var x2 = line[2];
-    var y2 = line[3];
+  _drawSuccessLine: function(line, winType) {
+    var x = line[0];
+    var y = line[1];
+    var winLine;
 
-    var color = 'red';
-    document.getElementById(x1 + '-' + y1).style.background = color;
-    document.getElementById(x2 + '-' + y2).style.background = color;
+    var rectWidth = this.rectWidth;
+    var padding = this.padding;
+
+    switch(winType) {
+      case 0: // 横向赢法
+        winLine = document.getElementById('lrLine');
+        winLine.style.display = 'block';
+        winLine.style.left = x * rectWidth + padding + 'px';
+        winLine.style.top = y * rectWidth + padding - 2 + 'px';
+        break;
+
+      case 1: // 竖向赢法
+        winLine = document.getElementById('tbLine');
+        winLine.style.display = 'block';
+        winLine.style.left = x * rectWidth + padding - 2 + 'px';
+        winLine.style.top = y * rectWidth + padding + 'px';
+        break;
+
+      case 2: // 右上赢法
+        winLine = document.getElementById('rtLine');
+        winLine.style.display = 'block';
+        winLine.style.left = x * rectWidth + padding + 2 + 'px';
+        winLine.style.top = y * rectWidth - 4 * rectWidth + padding - 2 + 'px';
+        break;
+
+      case 3: // 右下赢法
+        winLine = document.getElementById('rbLine');
+        winLine.style.display = 'block';
+        winLine.style.left = x * rectWidth + padding - 2 + 'px';
+        winLine.style.top = y * rectWidth + padding + 2 + 'px';
+        break;
+    }
   },
 
   // 绑定点击事件

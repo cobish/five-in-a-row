@@ -6,9 +6,19 @@
   <link rel="stylesheet" type="text/css" href="./index.css">
 </head>
 <body>
+  <!-- canvas 版本 -->
   <canvas id="checkerboard" width="450" height="450"></canvas>
-  <div id="domBoard" class="chessboard"></div>
 
+  <!-- dom 版本 -->
+  <div id="domBoard" class="chessboard">
+    <!-- 赢时画的横线 -->
+    <div id="lrLine" class="winLine"></div>
+    <div id="tbLine" class="winLine"></div>
+    <div id="rtLine" class="winLine"></div>
+    <div id="rbLine" class="winLine"></div>
+  </div>
+
+  <!-- 按钮们 -->
   <div class="container">
     <label>切换：</label>
     <select id="switch">
@@ -20,7 +30,6 @@
     <button id="revert">悔棋</button>
     <button id="removeRevert">撤销悔棋</button>
   </div>
-  
 
   <script type="text/javascript" src="./index.js"></script>
 </body>
